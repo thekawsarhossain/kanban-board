@@ -1,10 +1,12 @@
 import { Toaster } from "react-hot-toast";
-import Board from "./pages/board";
+import BoardPage from "./pages/board";
+import Header from "./Components/common/Header";
 
 const App = () => {
   return (
     <div>
-      <Board />
+      <Header />
+      <BoardPage />
       <Toaster
         position="bottom-left"
         toastOptions={{

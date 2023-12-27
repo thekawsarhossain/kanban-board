@@ -1,9 +1,11 @@
-const Board = () => {
+import Board from "../Components/board/Board";
+
+const BoardPage = () => {
     return (
-        <div>
-            <h2>Hello There | This is the Board Page!</h2>
+        <div className="bg-gray-100 h-[calc(100vh-52px)] pt-10">
+            <Board />
         </div>
     );
 };
 
-export default Board;
+export default BoardPage;
