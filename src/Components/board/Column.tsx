@@ -7,18 +7,21 @@ import { CSS } from "@dnd-kit/utilities";
 import { IColumn, ITask } from "../../Interfaces/board";
 import TaskCard from "./TaskCard";
 import TaskEntryControl from "./TaskEntryControl";
+import Skeleton from "./Skeleton";
 
 interface ColumnProps {
     column: IColumn;
     tasks: ITask[];
+    loading: boolean;
     tasksLoading: Set<string | number>;
 }
 
-const Column = ({ column, tasks, tasksLoading }: ColumnProps) => {
+const Column = ({ column, tasks, loading, tasksLoading }: ColumnProps) => {
     const [isOpenNewTaskPopup, setOpenPopup] = useState(false);
 
     const taskIds = useMemo(() => {
-        return tasks.map((_task: ITask, index) => index);
+        if (!tasks?.length) return [];
+        return tasks?.map((task: ITask) => task.id);
     }, [tasks]);
 
     const { setNodeRef, transform, transition } = useSortable({
@@ -42,15 +45,15 @@ const Column = ({ column, tasks, tasksLoading }: ColumnProps) => {
         >
             <div className="flex justify-between items-center py-4">
                 <h2 className="text-base leading-normal font-bold text-gray-200">
-                    {column.title}
+                    {column.title} <span className="font-normal">{tasks?.length}</span>
                 </h2>
-                <button className="text-gray-200 duration-100 hover:bg-gray-600 p-2 rounded-full">
+                <button disabled={loading} onClick={() => setOpenPopup(true)} className="text-gray-200 duration-100 hover:bg-gray-600 p-2 rounded-full">
                     <HiOutlinePlus />
                 </button>
             </div>
             <div className="flex flex-grow flex-col gap-4 overflow-x-hidden overflow-y-auto w-full">
                 <SortableContext items={taskIds}>
-                    {tasks.map((task: ITask) => (
+                    {loading ? <Skeleton /> : tasks?.map((task: ITask) => (
                         <TaskCard
                             key={task.id}
                             task={task}
@@ -59,6 +62,7 @@ const Column = ({ column, tasks, tasksLoading }: ColumnProps) => {
                     ))}
                 </SortableContext>
                 <button
+                    disabled={loading}
                     onClick={() => setOpenPopup(true)}
                     className="bg-white p-3 text-sm flex justify-between items-center rounded-lg"
                 >
@@ -68,7 +72,7 @@ const Column = ({ column, tasks, tasksLoading }: ColumnProps) => {
             </div>
             {isOpenNewTaskPopup && <TaskEntryControl
                 isOpen={isOpenNewTaskPopup}
-                columnId={column?.id}
+                priority={column?.id}
                 close={() => setOpenPopup(false)}
             />}
         </div>

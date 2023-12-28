@@ -13,6 +13,8 @@ interface CardProps {
 const TaskCard = ({ task, tasksLoading }: CardProps) => {
   const [isOpenEditTaskPopup, setOpenPopup] = useState(false);
 
+  const { id, task: taskContent, completed, assignee, priority } = task;
+
   const {
     setNodeRef,
     attributes,
@@ -21,12 +23,12 @@ const TaskCard = ({ task, tasksLoading }: CardProps) => {
     transition,
     isDragging,
   } = useSortable({
-    id: task.id,
+    id,
     data: {
       type: "Task",
       task,
     },
-    disabled: false // TODO: Make it dynamic 
+    disabled: tasksLoading?.has(id)
   });
 
   const style = {
@@ -53,22 +55,23 @@ const TaskCard = ({ task, tasksLoading }: CardProps) => {
       {...attributes}
       {...listeners}
       onClick={() => setOpenPopup(true)}
-      className={`bg-white p-3 min-h-24 rounded-lg shadow-sm border-2 duration-100 hover:border-sky-400 cursor-grab relative whitespace-pre-wrap break-words ${tasksLoading.has(task?.id) ? "animate-pulse" : ""
+      className={`bg-white p-3 min-h-24 rounded-lg shadow-sm border-2 duration-100 hover:border-sky-400 ${completed ? "border-green-500" : ""} cursor-grab relative whitespace-pre-wrap break-words ${tasksLoading.has(id) ? "animate-pulse" : ""
         }`}
     >
       {/* Content div */}
       <div
-        className="my-auto w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words relative"
+        className="my-auto w-full overflow-y-auto overflow-x-hidden whitespace-pre-wrap break-words"
       >
-        <p className="text-sm">{task?.task}</p>
+        <p className="text-sm">{taskContent}</p>
+        <p className="absolute bottom-2 text-xs text-gray-500">{assignee}</p>
       </div>
 
       {isOpenEditTaskPopup && (
         <TaskEntryControl
           isOpen={isOpenEditTaskPopup}
           close={() => setOpenPopup(false)}
-          columnId={task?.status as string}
-          taskId={task.id}
+          priority={priority as string}
+          taskId={id}
         />
       )}
     </div>

@@ -8,7 +8,7 @@ const App = () => {
       <Header />
       <BoardPage />
       <Toaster
-        position="bottom-left"
+        position="top-right"
         toastOptions={{
           duration: 10000,
           success: {

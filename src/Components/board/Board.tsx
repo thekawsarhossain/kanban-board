@@ -4,19 +4,44 @@ import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@
 import { arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import { boardColumns } from "../../constants/board";
-import { ITask } from "../../Interfaces/board";
+import { IColumn, ITask } from "../../Interfaces/board";
 import Column from "./Column";
 import TaskCard from "./TaskCard";
-
-const task1 = { id: 1, task: "Hello world", priority: "High", assigned_to: "Kawsar", assignee: "Me", completed: false, completed_at: new Date(), created_at: new Date(), due_date: new Date(), status: "BACKLOG" }
-
-const task2 = { id: 2, task: "This is an random task", priority: "Normal", assigned_to: "Kawsar", assignee: "Me", completed: false, completed_at: new Date(), created_at: new Date(), due_date: new Date(), status: "TODO" }
+import { useMutation, useQuery } from "react-query";
+import { getTasks, updateTask } from "../../providers/reactQuery";
+import toast from "react-hot-toast";
+import { queryClient } from "../../config/queryClient";
 
 const Board = () => {
-    const [tasks, setTasks] = useState<ITask[]>([task1, task2]);
-
+    const [tasks, setTasks] = useState<ITask[]>([]);
     const [activeTask, setActiveTask] = useState<ITask | null>(null);
     const [tasksLoading, setTasksLoading] = useState<Set<string | number>>(new Set());
+
+    const { isLoading } = useQuery("tasks", () => getTasks(), {
+        onSuccess: (data) => setTasks(data?.tasks ?? []),
+        onError: () => toast.error("Failed to fetch tasks!")
+    });
+
+    const { mutate: updateTaskMutation } = useMutation(updateTask, {
+        onMutate: async (task) => {
+            const previousTasks = queryClient.getQueryData('tasks');
+            queryClient.setQueryData('tasks', ({ tasks: prevTasks }) => {
+                const updatedTasks = (prevTasks as ITask[]).map((t: ITask) =>
+                    Number(t.id) === Number(task.id) ? { ...t, priority: task.priority, completed: task.completed ?? false } : t
+                );
+                return { tasks: updatedTasks };
+            });
+            return { previousTasks };
+        },
+        onError: (_, __, context) => {
+            toast.error("Failed to the move task!");
+            const previousTasks = context?.previousTasks;
+            queryClient.setQueryData('tasks', previousTasks);
+        },
+        onSettled: (_, __, { id }) => {
+            setTasksLoading((prevTasksLoading) => new Set([...prevTasksLoading].filter((i) => i !== id)));
+        },
+    });
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -46,13 +71,13 @@ const Board = () => {
                 const activeIndex = tasks.findIndex((task: ITask) => task.id === activeId);
                 const overIndex = tasks.findIndex((task: ITask) => task.id === overId);
 
-                if (tasks[activeIndex].status !== tasks[overIndex].status) {
-                    const previousStatus = oldTasks[activeIndex].status;
+                if (tasks[activeIndex].priority !== tasks[overIndex].priority) {
+                    const previousPriority = oldTasks[activeIndex].priority;
 
-                    tasks[activeIndex].status = tasks[overIndex].status;
+                    tasks[activeIndex].priority = tasks[overIndex].priority;
 
-                    if (previousStatus !== tasks[activeIndex].status) {
-                        updateTaskStatus(tasks[activeIndex]);
+                    if (previousPriority !== tasks[activeIndex].priority) {
+                        updateTaskPriority(tasks[activeIndex]);
                     }
                     return arrayMove(tasks, activeIndex, overIndex - 1);
                 }
@@ -66,12 +91,12 @@ const Board = () => {
                 const oldTasks = [...tasks];
                 const activeIndex = tasks.findIndex((task: ITask) => task.id === activeId);
 
-                const previousStatus = oldTasks[activeIndex].status;
+                const previousPriority = oldTasks[activeIndex].priority;
 
-                tasks[activeIndex].status = overId;
+                tasks[activeIndex].priority = overId;
 
-                if (previousStatus !== tasks[activeIndex].status) {
-                    updateTaskStatus(tasks[activeIndex]);
+                if (previousPriority !== tasks[activeIndex].priority) {
+                    updateTaskPriority(tasks[activeIndex]);
                 }
                 return arrayMove(tasks, activeIndex, activeIndex);
             });
@@ -88,15 +113,12 @@ const Board = () => {
         if (activeId === overId) return;
     }
 
-    const updateTaskStatus = (activeTask: ITask) => {
-        // TODO
-        const { id } = activeTask;
+    const updateTaskPriority = (activeTask: ITask) => {
+        const { id, priority, completed } = activeTask;
         setTasksLoading((prevTasksLoading) => new Set([...prevTasksLoading, id]));
 
-        console.log("In Update Task Status", activeTask)
-
-        // Once update done remove id from loading state 
-        setTasksLoading((prevTasksLoading) => new Set([...prevTasksLoading].filter((e) => e !== id)));
+        if (priority === "DONE" && !completed) updateTaskMutation({ id, priority, completed: true })
+        else updateTaskMutation({ id, priority })
     };
 
     return (
@@ -108,12 +130,13 @@ const Board = () => {
                 onDragStart={(e) => setActiveTask(e?.active?.data?.current?.task)}
             >
                 <div className="w-full flex justify-between gap-4">
-                    {boardColumns.map((col) => (
+                    {isLoading ? "Loading" : boardColumns.map((col: IColumn) => (
                         <Column
                             key={col.id}
                             column={col}
+                            loading={isLoading}
                             tasksLoading={tasksLoading}
-                            tasks={tasks.filter((task: ITask) => task.status === col.id)}
+                            tasks={tasks?.filter((task: ITask) => task?.priority.toUpperCase() === col.id)}
                         />
                     ))}
                 </div>

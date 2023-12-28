@@ -1,5 +1,5 @@
 export interface IColumn {
-    id: string | number;
+    id: string;
     title: string;
 }
 
@@ -13,5 +13,4 @@ export interface ITask {
     completed: boolean;
     completed_at: Date;
     created_at: Date;
-    status?: string;
 }
