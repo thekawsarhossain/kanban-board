@@ -11,6 +11,6 @@ export interface ITask {
     priority: string;
     due_date: Date;
     completed: boolean;
-    completed_at: Date;
+    completed_at: Date | null;
     created_at: Date;
 }

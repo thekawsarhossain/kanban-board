@@ -19,7 +19,7 @@ const Board = () => {
 
     const { isLoading } = useQuery("tasks", () => getTasks(), {
         onSuccess: (data) => setTasks(data?.tasks ?? []),
-        onError: () => toast.error("Failed to fetch tasks!")
+        onError: () => toast.error("Failed to fetch tasks!"),
     });
 
     const { mutate: updateTaskMutation } = useMutation(updateTask, {
@@ -130,7 +130,7 @@ const Board = () => {
                 onDragStart={(e) => setActiveTask(e?.active?.data?.current?.task)}
             >
                 <div className="w-full flex justify-between gap-4">
-                    {isLoading ? "Loading" : boardColumns.map((col: IColumn) => (
+                    {boardColumns.map((col: IColumn) => (
                         <Column
                             key={col.id}
                             column={col}

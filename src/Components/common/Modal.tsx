@@ -34,7 +34,7 @@ const Modal = ({ isOpen, close, children }: Props) => {
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden bg-white py-10 px-6 text-left align-middle shadow-xl transition-all rounded-lg">
+                            <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden bg-white p-3 md:p-5 text-left align-middle shadow-xl transition-all rounded-lg">
                                 {children}
                             </Dialog.Panel>
                         </Transition.Child>
