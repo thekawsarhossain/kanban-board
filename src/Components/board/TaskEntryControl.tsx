@@ -91,8 +91,8 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
         }
         else {
             (payload as unknown as { created_at: Date })["created_at"] = currentDate;
-            (payload as unknown as { completed: boolean })["completed"] = false;
-            (payload as unknown as { completed_at: Date | null })["completed_at"] = null;
+            (payload as unknown as { completed: boolean })["completed"] = selectedPriority === "DONE" ? true : false;
+            (payload as unknown as { completed_at: Date | null })["completed_at"] = selectedPriority === "DONE" ? currentDate : null;
         }
 
         mutate(payload);
