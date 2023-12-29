@@ -53,6 +53,8 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                 }
             });
 
+            queryClient.setQueryData('task', { ...data })
+
             close();
             toast.success(`Task ${taskId ? "updated" : "created"} successfully`);
         },
@@ -131,7 +133,7 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                                         maxLength={200}
                                         rows={2}
                                         onChange={handleChange}
-                                        defaultValue={formData?.task}
+                                        defaultValue={data?.task}
                                         className={`shadow-sm block px-3 py-2 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-sky-600 ${errors ? "border-red-600" : ""}`}
                                     />
                                     {errors && (<p className="text-xs text-error-red">{errors.message}</p>)}
@@ -155,7 +157,7 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                                             {...props}
                                             maxLength={200}
                                             onChange={handleChange}
-                                            defaultValue={formData?.assignee}
+                                            defaultValue={data?.assignee}
                                             className={`shadow-sm block px-3 py-2 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-sky-600 ${errors ? "border-red-600" : ""}`}
                                         />
                                         {errors && (<p className="text-xs text-error-red">{errors.message}</p>)}
@@ -178,7 +180,7 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                                             {...props}
                                             maxLength={200}
                                             onChange={handleChange}
-                                            defaultValue={formData?.assigned_to}
+                                            defaultValue={data?.assigned_to}
                                             className={`shadow-sm block px-3 py-2 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-sky-600 ${errors ? "border-red-600" : ""}`}
                                         />
                                         {errors && (<p className="text-xs text-error-red">{errors.message}</p>)}
@@ -204,7 +206,7 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                                             maxLength={200}
                                             onChange={handleChange}
                                             min={new Date().toISOString().split("T")[0]}
-                                            defaultValue={formData?.due_date ? new Date(formData?.due_date)?.toISOString()?.split('T')?.[0] : ''}
+                                            defaultValue={data?.due_date ? new Date(data?.due_date)?.toISOString()?.split('T')?.[0] : ''}
                                             className={`shadow-sm block px-3 py-2 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-sky-600 cursor-pointer ${errors ? "border-red-600" : ""}`}
                                         />
                                         {errors && (<p className="text-xs text-error-red">{errors.message}</p>)}
@@ -225,7 +227,7 @@ const TaskEntryControl = ({ isOpen, close, priority, taskId }: Props) => {
                                         <select
                                             {...props}
                                             onChange={handleChange}
-                                            defaultValue={formData?.priority || priority}
+                                            defaultValue={data?.priority || priority}
                                             className={`shadow-sm block px-3 py-2.5 border rounded-md placeholder-gray-400 sm:text-sm focus:outline-none focus:border-sky-600 ${errors ? "border-red-600" : ""}`}
                                         >
                                             {
